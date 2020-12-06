@@ -34,6 +34,9 @@ class Viewer():
         self.timer.setInterval(1)
         self.timer.timeout.connect(self.update_plot_data)
         self.timer.start()
+    
+    def stop_plot(self):
+        self.timer.stop()
 
     def update_plot_data(self):
         if self.platform_interface is not None:

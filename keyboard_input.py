@@ -34,7 +34,7 @@ class KeyboardInput():
     def __init__(self, data):
         self.set_baselines(data)
         self.key_values = [30, 48, 46, 32]
-        self.thresholds = [60, 60, 60, 60]
+        self.thresholds = [100, 100, 100, 100]
         self.hysteresis = [self.thresholds[0]/2, self.thresholds[1]/2, self.thresholds[2]/2, self.thresholds[3]/2]
         self.is_pressed = [ 0,  0,  0,  0]
 
