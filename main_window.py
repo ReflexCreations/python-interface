@@ -11,17 +11,16 @@ from pathlib import Path
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         self.settings = QtCore.QSettings("RE:Flex", "Dance Pad Settings")
-        self.profile = self.settings.value("default_profile", {"name": "Unsaved Profile"})
+        self.profile = {}
         super(MainWindow, self).__init__()
         self.load_settings()
-
-        title_string = "RE:Flex Configuration - " + self.profile["name"]
+        title_string = "RE:Flex Configuration"
         self.setWindowTitle(title_string)
         self.setPalette(self.dark_palette())
-        icon = QtGui.QIcon()
-        icon.addFile('assets/icon-16x16.png', QtCore.QSize(16, 16))
-        icon.addFile('assets/icon-48x48.png', QtCore.QSize(48, 48))
+        icon = QtGui.QIcon('assets\icon.ico')
         self.setWindowIcon(icon)
+        #icon.addFile('assets/icon-16x16.png', QtCore.QSize(16, 16))
+        #icon.addFile('assets/icon-48x48.png', QtCore.QSize(48, 48))
 
         scroll_area = QtWidgets.QScrollArea()
         layout = QtWidgets.QVBoxLayout()
@@ -149,35 +148,62 @@ class MainWindow(QtWidgets.QMainWindow):
         text, ok = QtWidgets.QInputDialog.getText(self, "Rename Pad", "Serial " + self.available_pads.currentData() + ": ")
         if ok:
             self.available_pads.setItemText(self.available_pads.currentIndex(), text)
+    
+    def load_profile(self):
+        self.show_graph.setChecked(self.profile['update_graphs'])
+        i = 0
+        for interface in self.panel_interfaces:
+            interface.sensor_viewer.settings.sensitivity_selector.setValue(self.profile['sensitivities'][i])
+            interface.led_viewer.settings.set_led_path(self.profile['light_paths'][i])
+            i += 1
+        self.available_pads.setCurrentIndex(self.available_pads.findData(self.profile['selected_profile']))
 
     def get_profile(self):
-        title_string = "RE:Flex Configuration - " + self.profile["name"]
-        self.setWindowTitle(title_string)
         self.profile_picker = QtWidgets.QFileDialog()
         self.profile_picker.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         self.profile_picker.setNameFilters(["RE:Flex Profile Files(*.rfx)"])
         if self.profile_picker.exec_():
-            file_name = self.profile_picker.selectedFiles()
-            f = open(file_name[0], 'r')
+            file_n = self.profile_picker.selectedFiles()
+            f = open(file_n[0], 'r')
             with f:
-                file_name = Path(file_name[0]).stem
+                file_name = Path(file_n[0]).stem
                 title_string = "RE:Flex Configuration - " + file_name
                 self.setWindowTitle(title_string)
-                print(type(file_name))
-                self.profile = {}
-                self.profile["name"] = file_name
+                self.profile = json.load(f)
+        self.load_profile()
         
     def set_profile(self):
         path, _ = QtWidgets.QFileDialog.getSaveFileName(self, filter='RE:Flex Profile Files(*.rfx)')
         if path != '':
             with open(path, 'w', encoding='utf-8') as f:
+                file_name = Path(path).stem
+                self.profile['name'] = file_name
+                self.profile['selected_profile'] = self.available_pads.currentData()
+                self.profile['update_graphs'] = self.show_graph.isChecked() 
+                self.profile['sensitivities'] = []
+                self.profile['light_paths'] = []
+                for interface in self.panel_interfaces:
+                    self.profile['sensitivities'].append(interface.sensor_viewer.settings.sensitivity)
+                    self.profile['light_paths'].append(interface.led_viewer.settings.file_path)
                 json.dump(self.profile, f, indent=4)
-                file_name = Path(path[0]).stem
                 title_string = "RE:Flex Configuration - " + str(file_name)
                 self.setWindowTitle(title_string)
 
     def connect_clicked(self):
-        if not self.platform.launch(self.available_pads.currentData()):
+        led_files = []
+        for interface in self.panel_interfaces:
+            led_files.append(interface.led_viewer.settings.file_path)
+        try:
+            self.platform.assign_led_files(led_files)
+        except:
+            QtWidgets.QMessageBox.warning(self, "Warning", "Please select valid 12*12px PNG files for each panel.")
+            return
+
+        sensitivities = []
+        for interface in self.panel_interfaces:
+            sensitivities.append(interface.sensor_viewer.settings.sensitivity)
+
+        if not self.platform.launch(self.available_pads.currentData(), sensitivities):
             QtWidgets.QMessageBox.warning(self, "Warning", "Cannot open connection to selected dance pad.")
             self.enumerate()
         elif self.platform.is_running:
@@ -185,10 +211,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.connect_button.setDisabled(True)
             self.enumerate_button.setDisabled(True)
             self.disconnect_button.setEnabled(True)
+            self.pad_rename.setDisabled(True)
             self.open_profile_button.setDisabled(True)
             self.save_profile_button.setDisabled(True)
             self.show_graph.setDisabled(True)
             self.available_pads.setDisabled(True)
+            for interface in self.panel_interfaces:
+                interface.sensor_viewer.settings.sensitivity_selector.setDisabled(True)
+                interface.led_viewer.settings.file_picker.setDisabled(True)
             panel_index = 0
             if self.show_graph.isChecked():
                 for panel_interface in self.panel_interfaces:
@@ -207,12 +237,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lights_freq.setText("LED FPS: 00")
 
         self.connect_button.setEnabled(True)
+        self.pad_rename.setEnabled(True)
         self.enumerate_button.setEnabled(True)
         self.disconnect_button.setDisabled(True)
         self.open_profile_button.setEnabled(True)
         self.save_profile_button.setEnabled(True)
         self.show_graph.setEnabled(True)
         self.available_pads.setEnabled(True)
+        for interface in self.panel_interfaces:
+                interface.sensor_viewer.settings.sensitivity_selector.setEnabled(True)
+                interface.led_viewer.settings.file_picker.setEnabled(True)
 
     def enumerate(self):
         devs = self.platform.enumerate()
@@ -224,6 +258,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 name = d['serial_number']
             self.available_pads.addItem(name, d['serial_number'])
         self.available_pads.setCurrentIndex(0)
+        if len(self.available_pads) == 0:
+            self.connect_button.setDisabled(True)
+            self.pad_rename.setDisabled(True)
+        else:
+            self.connect_button.setEnabled(True)
+            self.pad_rename.setEnabled(True)
 
     def load_settings(self):
         if not self.settings.value("geometry") == None:
@@ -253,10 +293,10 @@ class PanelInterface():
         self.viewer = Viewer()
         panel_layout.addWidget(self.viewer.graph_widget)
         self.led_panel = QtWidgets.QWidget()
-        led_viewer = LedViewer()
-        sensor_viewer = SensorViewer()
-        panel_layout.addWidget(led_viewer)
-        panel_layout.addWidget(sensor_viewer)
+        self.led_viewer = LedViewer()
+        self.sensor_viewer = SensorViewer()
+        panel_layout.addWidget(self.led_viewer)
+        panel_layout.addWidget(self.sensor_viewer)
 
         self.widget = QtWidgets.QGroupBox(name)
         self.widget.setLayout(panel_layout)

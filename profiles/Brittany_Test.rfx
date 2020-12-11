@@ -1,0 +1,17 @@
+{
+    "name": "Brittany_Test",
+    "selected_profile": "2063345A4641",
+    "update_graphs": true,
+    "sensitivities": [
+        600,
+        600,
+        600,
+        600
+    ],
+    "light_paths": [
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png",
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png",
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png",
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png"
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "name": "Brittany_Stamina",
+    "selected_profile": "2063345A4641",
+    "update_graphs": false,
+    "sensitivities": [
+        200,
+        300,
+        100,
+        200
+    ],
+    "light_paths": [
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/co.png",
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/pg.png",
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/pg.png",
+        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/co.png"
+    ]
+}

@@ -26,8 +26,7 @@ class LedProcessor():
         if image.size[0] != self.__LED_GRID_WIDTH or image.size[1] != self.__LED_GRID_HEIGHT:
 
             raise LedProcessorError(
-                f"Can only process {exp_w}x{exp_h} PNGs at the moment, "
-                f"but got {w}x{h}"
+                f"Can only process {exp_w}x{exp_h} PNGs at the moment"
             )
         
         image = image.rotate(rot)

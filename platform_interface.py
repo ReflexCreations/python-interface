@@ -9,7 +9,7 @@ class PlatformInterface():
         devices = [d for d in hid.enumerate(self.USB_VID, self.USB_PID)]
         return devices
 
-    def launch(self, serial):
+    def launch(self, serial, sensitivities):
         if serial == None:
             serial = '0'
         self.h = hid.device()
@@ -19,19 +19,28 @@ class PlatformInterface():
             return 0
         if self.h.get_product_string() == 'RE:Flex Dance Pad':
             self.is_running = True
-            self.setup()
+            self.setup(sensitivities)
             return 1
         else:
             self.is_running = False
             return 0
 
-    def setup(self):
+    def assign_led_files(self, led_files):
+        self.led_files = led_files
+        self.led_sources = [
+            LedProcessor.from_file(self.led_files[0], 90),
+            LedProcessor.from_file(self.led_files[1], 180),
+            LedProcessor.from_file(self.led_files[2], 0),
+            LedProcessor.from_file(self.led_files[3], 270)
+        ]
+
+    def setup(self, sensitivities):
         self.sample_counter = 0
 
         data = self.h.read(64)
         self.organize_data(data)
         self.sum_panel_data(self.panel_data)
-        self.keyboard_input = KeyboardInput(self.panel_values)
+        self.keyboard_input = KeyboardInput(self.panel_values, sensitivities)
 
         self.pressed_on_frame = list(range(4))
         self.last_frame = list(range(4))
@@ -41,13 +50,6 @@ class PlatformInterface():
         self.led_frame_data = 0
         self.led_data = []
         self.lights_counter = 0
-
-        self.led_sources = [
-                LedProcessor.from_file("assets/pg.png", 90),
-                LedProcessor.from_file("assets/co.png", 180),
-                LedProcessor.from_file("assets/co.png", 0),
-                LedProcessor.from_file("assets/pg.png", 270)
-            ]
 
         thread = threading.Thread(target=self.loop, daemon=True)
         thread.start()

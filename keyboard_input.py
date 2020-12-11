@@ -31,10 +31,10 @@ class Input(ctypes.Structure):
                 ("ii", Input_I)]
 
 class KeyboardInput():
-    def __init__(self, data):
+    def __init__(self, data, sensitivities):
         self.set_baselines(data)
         self.key_values = [30, 48, 46, 32]
-        self.thresholds = [100, 100, 100, 100]
+        self.thresholds = [sensitivities[0], sensitivities[1], sensitivities[2], sensitivities[3]]
         self.hysteresis = [self.thresholds[0]/2, self.thresholds[1]/2, self.thresholds[2]/2, self.thresholds[3]/2]
         self.is_pressed = [ 0,  0,  0,  0]
 
