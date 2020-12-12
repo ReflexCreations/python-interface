@@ -11,7 +11,7 @@ The tool further acts as a reference implementation for those who wish to implem
 It implements the following features:
 - Sensor data capture / conversion - Implements an extremely rudimentary absolute value driven sensor step detection implementation.
 - Keyboard emulation - Maps the panels Left/Down/Up/Right to keyboard keys A/B/C/D. This is the easiest way to communicate with any / all programs.
-- PNG file display on panels - Converts a 12x12 PNG file and displays this on panels when it is activated.
+- PNG file display on panels - Converts a 12x12 PNG file and displays this on panels when it is activated. Automatically rotates each image to match the panel (default being the UP arrow).
 - User profiles - Can save user information to a '.rfx' file (A python dictionary stored in JSON format), making it easy to switch settings quickly.
 
 Example user profiles and LED PNG files are provided in the `profiles` and `assets` directories.
@@ -69,6 +69,7 @@ As with everything, there's a lot that we could do to make this program better. 
 - Currently, to connect to a pad, PNG files for LEDs need to be specified. This can be annoying. It could be worth having a set of default LED files. Whether that be simple arrows, or just nothing at all. A drop-down or something similar to select default LED files would also be useful here.
 - Maybe make the icon actually display in the title bar and taskbar. It's kind of ugly. 
 - Minimizing to system tray could also be useful. 
+- The automatic PNG array rotation should be toggle-able.
 
 ### Feature Improvements
 
