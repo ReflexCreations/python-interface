@@ -58,7 +58,7 @@ As with everything, there's a lot that we could do to make this program better. 
 
 - When more than one instance of the configuration tool is open, a single pad can still be accessed by both instances. This prevents both tools from communicating with the pad.
 - Graphing reduces the sensor / LED update frequency. This isn't the end of the world as it's toggle-able, but it warrants investigation to prevent graphing data updates from causing the data to slow down.
-- LED and sensort communication should run in separate threads and take the highest priority to ensure 1kHz communication to sensors and 62.5FPS communication to the LEDs.
+- LED and sensor communication should run in separate threads and take the highest priority to ensure 1kHz communication to sensors and 62.5FPS communication to the LEDs.
 - Currently, the paths for LED images and profiles are absolute. It would be useful if the image paths were relative to the location of the profile. This'd allow portability of these files between computers. That is, you could bring a USB stick to a friend's house and use your profile and images on their setup.
 - Most of the code is portable, but a Linux / Mac OS implementation still need to be investigated and deployed. It would be best if the single code base could work on all of them, so the it would need to account for differences between these platforms.
 
