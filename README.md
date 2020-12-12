@@ -28,12 +28,7 @@ Within VS Code you can then use the provided terminal to setup your virtual envi
 
 ```
 python -m venv env
-pip install PyQt5
-pip install hidapi
-pip install pillow
-pip install numpy
-pip install pyqtgraph
-pip install pyinstaller
+pip install -r requirements.txt
 ```
 
 You can activate your virtual environment by entering `env/Scripts/Activate.ps1` in your terminal, which is a powershell script that is automatically run by VS Code on project load. 
