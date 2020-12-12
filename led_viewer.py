@@ -70,10 +70,13 @@ class LedSettings(QtWidgets.QWidget):
                 self.file_name_label.setText(Path(file_name[0]).stem)
 
     def set_led_path(self, path):
-        f = open(path, 'r')
-        with f:
-            self.file_path = path
-            self.file_name_label.setText(Path(path).stem)
+        try:
+            f = open(path, 'r')
+            with f:
+                self.file_path = path
+                self.file_name_label.setText(Path(path).stem)
+        except Exception:
+            pass
 
 class LedPanel(QtWidgets.QWidget):
     def __init__(self):

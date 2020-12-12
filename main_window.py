@@ -17,10 +17,6 @@ class MainWindow(QtWidgets.QMainWindow):
         title_string = "RE:Flex Configuration"
         self.setWindowTitle(title_string)
         self.setPalette(self.dark_palette())
-        icon = QtGui.QIcon('assets\icon.ico')
-        self.setWindowIcon(icon)
-        #icon.addFile('assets/icon-16x16.png', QtCore.QSize(16, 16))
-        #icon.addFile('assets/icon-48x48.png', QtCore.QSize(48, 48))
 
         scroll_area = QtWidgets.QScrollArea()
         layout = QtWidgets.QVBoxLayout()
@@ -249,6 +245,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 interface.led_viewer.settings.file_picker.setEnabled(True)
 
     def enumerate(self):
+        for i in range(self.available_pads.count()):
+            self.settings.setValue(self.available_pads.itemData(i), self.available_pads.itemText(i))
         devs = self.platform.enumerate()
         self.available_pads.clear()
         for d in devs:
