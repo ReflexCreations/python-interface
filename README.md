@@ -64,6 +64,7 @@ As with everything, there's a lot that we could do to make this program better. 
 - The step detection could be far better. It should be converted to use a delta based step tracking system. It can utilize position tracking to handle foot-switching without removal of previous foot. And the pad is prone to vibration-induced hits. Anti-vibration should help. All of these options should be toggle-able / saved to profiles. 
 - Currently we just serve images to the panels. This could be dramatically improved, also. Color-correction could be applied as the LEDs are non-linear in perceived brightness. GIFs could be interpreted to actually make use of the animation capability of the pad. Improvement from just 12x12 images would be useful. We could even have our own data format for light 'routines'. 
 - When firmware updates via USB / UART are made available for I/O and Panel boards, the utility should have an interface to flash a compiled executable to the platform. However, this is dependent on updates to the electronics and firmware.
+- In the future, the pad won't just be 4-panel dependent. So a way to interpret how many panels are connected, and what configuration they're in while updating the GUI to match could dramatically improve usability. 
 
 ## Release
 
