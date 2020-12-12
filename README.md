@@ -27,6 +27,7 @@ pip install hidapi
 pip install pillow
 pip install numpy
 pip install pyqtgraph
+pip install pyinstaller
 ```
 
 You can activate your virtual environment by entering `env/Scripts/Activate.ps1` in your terminal, which is a powershell script that is automatically run by VS Code on project load. 
