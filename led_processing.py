@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import math
 
 class LedProcessorError(Exception):
     pass
@@ -124,7 +125,7 @@ class LedProcessor():
         interested in, discards alpha values as transparency doesn't apply,
         and returns an array of 3-value (RGB) tuples, representing each of the
         LEDs in pixel_mask where it's "1", in order of left to right, top to
-        bottom.
+        bottom. We also apply color correction here.
         """
 
         rgb_values_list = []
@@ -149,12 +150,18 @@ class LedProcessor():
 
         # Group into rgb tuples
         for i in range(0, int(len(rgb_values_list) / 3)):
-            r = rgb_values_list[i * 3 + 0]
-            g = rgb_values_list[i * 3 + 1]
-            b = rgb_values_list[i * 3 + 2]
+            r = self.color_correct(float(rgb_values_list[i * 3 + 0])/255.0, 1.0)
+            g = self.color_correct(float(rgb_values_list[i * 3 + 1])/255.0, 0.8)
+            b = self.color_correct(float(rgb_values_list[i * 3 + 2])/255.0, 0.9)
             rgb_values.append((r,g,b))
 
         return rgb_values
+    
+    def color_correct(self, in_col, mul):
+        out_col = math.floor(math.pow(in_col, 2) * 255.0 * mul)
+        out_col = max(0, min(out_col, 255))
+        out_col = int(out_col)
+        return out_col
 
     def __order_into_segments(self, rgb_values):
         ordered_leds = [None] * self.__LED_COUNT
