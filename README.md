@@ -72,6 +72,7 @@ As with everything, there's a lot that we could do to make this program better. 
 - Currently we just serve static images to the panels. This could be dramatically improved. Color-correction could be applied as the LEDs are non-linear in perceived brightness. GIFs could be interpreted to make use of the pads' animation capability. Automatic scaling to the required 12x12 size would make it easier to use; right now only PNGs that are exactly 12x12px are supported. We could even have our own data format for light 'routines';
 - When firmware updates via USB / UART are made available for I/O and Panel boards, the utility should have an interface to flash a compiled executable to the platform. This however, depends on updates to the electronics and firmware.
 - In the future, the pad won't just be 4-panel dependent. So a way to interpret how many panels are connected, and what configuration they're in while updating the GUI to match could dramatically improve flexibility.
+- When EEPROM emulation and settings are implemented on IO and panel firmware, we should add a settings screen allowing these values to be toggled. The available settings could be passed back from the devices to generate this GUI, or just hard-coded into the GUI. We could then read back these values from the device.
 
 ## Release
 
