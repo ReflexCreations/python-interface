@@ -1,5 +1,4 @@
 import sys
-import os
 import json
 from PyQt5 import QtWidgets, QtGui, QtCore
 from platform_interface import PlatformInterface
@@ -7,6 +6,7 @@ from graph_viewer import Viewer
 from led_viewer import LedViewer
 from sensor_viewer import SensorViewer
 from pathlib import Path
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -118,7 +118,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lights_freq.setFont(fps_font)
         self.lights_freq.setFixedWidth(90)
 
-
         options_toolbar_layout = QtWidgets.QHBoxLayout()
         options_toolbar_layout.addWidget(self.open_profile_button)
         options_toolbar_layout.addWidget(self.save_profile_button)
@@ -129,7 +128,6 @@ class MainWindow(QtWidgets.QMainWindow):
         options_toolbar_widget = QtWidgets.QWidget()
         options_toolbar_widget.setLayout(options_toolbar_layout)
         options_toolbar_layout.setContentsMargins(2, 2, 2, 2)
-
 
         toolbar_layout = QtWidgets.QVBoxLayout()
         toolbar_layout.setContentsMargins(2, 2, 2, 2)
@@ -144,12 +142,15 @@ class MainWindow(QtWidgets.QMainWindow):
         text, ok = QtWidgets.QInputDialog.getText(self, "Rename Pad", "Serial " + self.available_pads.currentData() + ": ")
         if ok:
             self.available_pads.setItemText(self.available_pads.currentIndex(), text)
-    
+
     def load_profile(self):
         self.show_graph.setChecked(self.profile['update_graphs'])
         i = 0
         for interface in self.panel_interfaces:
             interface.sensor_viewer.settings.sensitivity_selector.setValue(self.profile['sensitivities'][i])
+            index = interface.sensor_viewer.settings.key_selector.findData(self.profile['keymaps'][i])
+            if index is not -1:
+                interface.sensor_viewer.settings.key_selector.setCurrentIndex(index)
             interface.led_viewer.settings.set_led_path(self.profile['light_paths'][i])
             i += 1
         self.available_pads.setCurrentIndex(self.available_pads.findData(self.profile['selected_profile']))
@@ -175,11 +176,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 file_name = Path(path).stem
                 self.profile['name'] = file_name
                 self.profile['selected_profile'] = self.available_pads.currentData()
-                self.profile['update_graphs'] = self.show_graph.isChecked() 
+                self.profile['update_graphs'] = self.show_graph.isChecked()
                 self.profile['sensitivities'] = []
                 self.profile['light_paths'] = []
+                self.profile['keymaps'] = []
                 for interface in self.panel_interfaces:
                     self.profile['sensitivities'].append(interface.sensor_viewer.settings.sensitivity)
+                    self.profile['keymaps'].append(interface.sensor_viewer.settings.keymap)
                     self.profile['light_paths'].append(interface.led_viewer.settings.file_path)
                 json.dump(self.profile, f, indent=4)
                 title_string = "RE:Flex Configuration - " + str(file_name)
@@ -191,15 +194,17 @@ class MainWindow(QtWidgets.QMainWindow):
             led_files.append(interface.led_viewer.settings.file_path)
         try:
             self.platform.assign_led_files(led_files)
-        except:
+        except Exception:
             QtWidgets.QMessageBox.warning(self, "Warning", "Please select valid 12*12px PNG files for each panel.")
             return
 
         sensitivities = []
+        keymaps = []
         for interface in self.panel_interfaces:
             sensitivities.append(interface.sensor_viewer.settings.sensitivity)
+            keymaps.append(interface.sensor_viewer.settings.keymap)
 
-        if not self.platform.launch(self.available_pads.currentData(), sensitivities):
+        if not self.platform.launch(self.available_pads.currentData(), sensitivities, keymaps):
             QtWidgets.QMessageBox.warning(self, "Warning", "Cannot open connection to selected dance pad.")
             self.enumerate()
         elif self.platform.is_running:
@@ -214,6 +219,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.available_pads.setDisabled(True)
             for interface in self.panel_interfaces:
                 interface.sensor_viewer.settings.sensitivity_selector.setDisabled(True)
+                interface.sensor_viewer.settings.key_selector.setDisabled(True)
                 interface.led_viewer.settings.file_picker.setDisabled(True)
             panel_index = 0
             if self.show_graph.isChecked():
@@ -227,8 +233,8 @@ class MainWindow(QtWidgets.QMainWindow):
         panel_index = 0
         if self.show_graph.isChecked():
             for panel_interface in self.panel_interfaces:
-                        panel_interface.viewer.stop_plot()
-                        panel_index += 1
+                panel_interface.viewer.stop_plot()
+                panel_index += 1
         self.sensor_freq.setText("Sensor Freq: 0000 Hz")
         self.lights_freq.setText("LED FPS: 00")
 
@@ -241,8 +247,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show_graph.setEnabled(True)
         self.available_pads.setEnabled(True)
         for interface in self.panel_interfaces:
-                interface.sensor_viewer.settings.sensitivity_selector.setEnabled(True)
-                interface.led_viewer.settings.file_picker.setEnabled(True)
+            interface.sensor_viewer.settings.sensitivity_selector.setEnabled(True)
+            interface.sensor_viewer.settings.key_selector.setEnabled(True)
+            interface.led_viewer.settings.file_picker.setEnabled(True)
 
     def enumerate(self):
         for i in range(self.available_pads.count()):
@@ -251,7 +258,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.available_pads.clear()
         for d in devs:
             if d['serial_number'] in self.settings.allKeys():
-                name = self.settings.value(d['serial_number']) 
+                name = self.settings.value(d['serial_number'])
             else:
                 name = d['serial_number']
             self.available_pads.addItem(name, d['serial_number'])
@@ -264,9 +271,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pad_rename.setEnabled(True)
 
     def load_settings(self):
-        if not self.settings.value("geometry") == None:
+        if not self.settings.value("geometry") is None:
             self.restoreGeometry(self.settings.value("geometry"))
-        if not self.settings.value("windowState") == None:
+        if not self.settings.value("windowState") is None:
             self.restoreState(self.settings.value("windowState"))
 
         self.setMinimumWidth(640)
@@ -280,10 +287,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.save_settings()
-    
+
     def widget_update(self):
         self.sensor_freq.setText("Sensor Freq: " + "{:04d}".format(self.platform.sensor_rate()) + "Hz")
         self.lights_freq.setText("LED FPS: " + "{:04d}".format(self.platform.lights_rate()))
+
 
 class PanelInterface():
     def __init__(self, name):
@@ -298,7 +306,7 @@ class PanelInterface():
 
         self.widget = QtWidgets.QGroupBox(name)
         self.widget.setLayout(panel_layout)
-        #self.widget.setMinimumHeight(led_viewer.viewer.AREA + 40)
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

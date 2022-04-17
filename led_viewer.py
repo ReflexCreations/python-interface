@@ -32,7 +32,6 @@ class LedSettings(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QtWidgets.QVBoxLayout()
-
         
         self.label = QtWidgets.QLabel("Light Settings")
         font = QtGui.QFont()
@@ -43,7 +42,7 @@ class LedSettings(QtWidgets.QWidget):
 
         self.style_select = QtWidgets.QComboBox()
         self.style_select.addItem("On Press")
-        #self.style_select.addItem("Cyclic")
+        self.style_select.setEnabled(False)
         self.layout.addWidget(self.style_select)
         self.file_path = ""
 
