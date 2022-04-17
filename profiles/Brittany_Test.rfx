@@ -8,10 +8,16 @@
         600,
         600
     ],
+    "keymaps": [
+        30,
+        48,
+        46,
+        32
+    ],
     "light_paths": [
-        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png",
-        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png",
-        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png",
-        "C:/Users/Brittany/repos/reflex-2-release/python-interface/assets/mask.png"
+        "C:/Users/brittany/repos/reflex/python-interface/assets/co.png",
+        "C:/Users/brittany/repos/reflex/python-interface/assets/pg.png",
+        "C:/Users/brittany/repos/reflex/python-interface/assets/pg.png",
+        "C:/Users/brittany/repos/reflex/python-interface/assets/co.png"
     ]
 }
